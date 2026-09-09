@@ -2,10 +2,12 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowDownUp,
   Check,
   ChevronRight,
   CircleHelp,
   Copy,
+  DollarSign,
   Eye,
   EyeOff,
   Gift,
@@ -17,6 +19,8 @@ import {
   QrCode,
   ReceiptText,
   ScanLine,
+  ShieldCheck,
+  ShoppingBag,
   Send,
   Smartphone,
   Sparkles,
@@ -27,6 +31,7 @@ import {
 import "./index.css";
 import "./light-overrides.css";
 import "./receipt-overrides.css";
+import "./home-reference-overrides.css";
 
 type Screen =
   | "splash"
@@ -346,23 +351,25 @@ function HomeScreen({
           <div className="hero-actions-right">
             <button className="circle-action" onClick={onToggleBalance} aria-label="Ocultar saldo">{hiddenBalance ? <EyeOff size={18} /> : <Eye size={18} />}</button>
             <button className="circle-action" onClick={onHelp} aria-label="Ajuda"><CircleHelp size={19} /></button>
-            <button className="circle-action" onClick={onGift} aria-label="Convites"><Gift size={18} /></button>
+            <button className="circle-action" onClick={onGift} aria-label="Verificação"><ShieldCheck size={20} /></button>
           </div>
         </div>
         <button className="greeting" onClick={onEditName}>Olá, {name}<span className="edit-dot" /></button>
       </section>
 
       <section className="home-content">
-        <button className="balance-row" onClick={onEditBalance}>
-          <div><span className="eyebrow">Saldo em conta</span><strong>{hiddenBalance ? "R$ •••••" : balance}</strong></div>
-          <ChevronRight size={18} />
-        </button>
-        <button className="link-account" onClick={() => onAction("Vincular conta")}><Plus size={13} /> Vincular conta</button>
+        <div className="balance-head">
+          <button className="balance-row" onClick={onEditBalance}>
+            <div><span className="eyebrow">Saldo em conta</span><strong>{hiddenBalance ? "R$ •••••" : balance}</strong></div>
+            <ChevronRight size={18} />
+          </button>
+          <button className="link-account" onClick={() => onAction("Vincular conta")}><Plus size={13} /> Vincular conta</button>
+        </div>
 
         <div className="action-scroller">
-          {actions.map(({ label, icon: Icon, action }) => (
+          {actions.map(({ label, icon: Icon, action }, actionIndex) => (
             <button className="action-item" onClick={action} key={label}>
-              <span className="action-circle"><Icon size={21} strokeWidth={1.7} /></span>
+              <span className="action-circle"><Icon size={25} strokeWidth={1.55} />{actionIndex === 2 && <em className="action-badge">FGTS</em>}</span>
               <span>{label.split("\n").map((part, index) => <span key={part}>{index > 0 && <br />}{part}</span>)}</span>
             </button>
           ))}
@@ -383,10 +390,10 @@ function HomeScreen({
         </button>
 
         <div className="bottom-nav">
-          <button className="bottom-nav-active"><Grid2X2 size={19} /><span>Início</span></button>
-          <button onClick={() => onAction("Benefícios")}><Gift size={19} /><span>Benefícios</span></button>
-          <button onClick={() => onAction("Conta")}><UserRound size={19} /><span>Conta</span></button>
-          <button onClick={() => onAction("Mais opções")}><MoreHorizontal size={19} /><span>Mais</span></button>
+          <button className="bottom-nav-active" onClick={() => onAction("Transferir")} aria-label="Transferir"><ArrowDownUp size={22} /></button>
+          <button onClick={() => onAction("Dinheiro")} aria-label="Dinheiro"><DollarSign size={22} /></button>
+          <button onClick={() => onAction("Cartões")} aria-label="Cartões"><ShoppingBag size={21} /></button>
+          <button onClick={() => onAction("Celular")} aria-label="Celular"><Smartphone size={21} /></button>
         </div>
       </section>
     </div>
