@@ -1,0 +1,14 @@
+{
+  "name": "PurpouBank",
+  "short_name": "PurpouBank",
+  "description": "Simulador visual de fluxo Pix",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f7f5f8",
+  "theme_color": "#8f6ca2",
+  "lang": "pt-BR",
+  "icons": [
+    { "src": "/purpoubank-icon.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

@@ -1,0 +1,82 @@
+/* Visual light inspirado no vídeo, com contraste suave e hierarquia menos saturada. */
+:root { color: #2d2730; background: #f7f5f8; }
+body { background: #eeeaf0; }
+.app-shell { color: #2d2730; background: #f7f5f8; }
+.splash-shell { color: #fff; background: linear-gradient(145deg, #9b84aa, #766181); }
+.status-bar { color: #76697d; }
+.hero-panel { background: linear-gradient(145deg, #eee6f2 0%, #ded2e5 100%); box-shadow: 0 12px 35px #a08ca822; }
+.hero-panel::after { opacity: .05; }
+.avatar-button, .circle-action { color: #5f5365; border-color: #cfc2d6; background: #ffffff8c; }
+.greeting { color: #3b3040; }
+.edit-dot { background: #8f6ca2; }
+.home-content { background: #f7f5f8; }
+.balance-row, .simple-row, .credit-card { color: #302a34; }
+.eyebrow, .balance-row .eyebrow { color: #847989; }
+.balance-row strong { color: #2b2530; }
+.link-account { color: #76697d; border-color: #d6cbd9; background: #fff; }
+.action-item { color: #716777; }
+.action-circle { color: #756a7a; border-color: #d7ccd9; background: #fff; box-shadow: 0 4px 12px #b7a9bd24; }
+.action-item:hover .action-circle { border-color: #9c83a9; }
+.simple-row { background: #fff; box-shadow: 0 4px 14px #b4a4bd1d; }
+.row-icon { border-color: #c3b7c7; color: #756b7b; }
+.promo-card { color: #44354d; border-color: #d2c1dc; background: linear-gradient(120deg, #eee4f3, #e5d9eb); box-shadow: 0 8px 20px #b5a3bd20; }
+.promo-label { color: #826b90; }
+.promo-spark { color: #91779f; }
+.promo-dots i { background: #c2b1c9; }
+.promo-dots .active { background: #9275a1; }
+.section-rule, .review-details > div, .success-details > div, .receipt-line { background: transparent; border-color: #e4dde7; }
+.bottom-nav { border-top-color: #e2dbe5; background: #faf9fbf2; }
+.bottom-nav button { color: #9a8f9d; }
+.bottom-nav button:hover, .bottom-nav-active { color: #80648e !important; }
+.flow-screen, .amount-screen, .review-screen, .pin-screen, .success-screen, .processing-screen { color: #2d2730; background: #f7f5f8; }
+.icon-button { color: #6e6274; }
+.pix-header h1, .amount-display strong, .review-main h1, .pin-content h1, .success-content h1 { color: #2d2730; }
+.pix-header .eyebrow, .amount-top span, .amount-display span, .field-label, .pay-card > span, .muted-copy, .review-kicker, .pin-content p, .success-to { color: #887c8d; }
+.search-input-wrap { border-bottom-color: #a68db1; }
+.search-input-wrap input { color: #3a3040; }
+.search-input-wrap input::placeholder { color: #a095a6; }
+.search-input-wrap svg { color: #8b7298; }
+.search-divider, .review-recipient { background: transparent; border-color: #e4dce7; }
+.contact { color: #6e6274; }
+.contact > span { color: #74657c; background: #e9e2eb; }
+.contact small { color: #9b8fa0; }
+.floating-next { color: #fff; background: #8f6ca2; box-shadow: 0 8px 20px #8f6ca238; }
+.amount-underline { background: linear-gradient(90deg, #a38aad, #e6dfe9); }
+.wallet-card { border-color: #c5accf; background: #eee6f1; }
+.wallet-icon { color: #fff; background: #9b7cab; }
+.wallet-card b { color: #493c50; }
+.wallet-card small { color: #897c8f; }
+.number-pad button { color: #514654; background: #fff; box-shadow: 0 3px 10px #baaebe22; }
+.number-pad button:hover { background: #eee7f1; }
+.primary-button { color: #fff; background: #8f6ca2; box-shadow: 0 8px 20px #8f6ca238; }
+.review-symbol { color: #806790; background: #e6d9eb; }
+.review-recipient strong, .review-details b, .success-details b { color: #4a3e4f; }
+.lock-circle { color: #806790; border-color: #cab7d0; background: #eee5f1; }
+.pin-dots span { border-color: #b4a7b9; }
+.pin-dots .filled { border-color: #8f6ca2; background: #8f6ca2; box-shadow: 0 0 11px #8f6ca244; }
+.processing-mark > span { color: #5b4763; }
+.processing-ring { border-color: #9d80aa; box-shadow: inset 0 0 30px #b99ac73d, 0 0 35px #b99ac738; }
+.progress-line { background: #e0d7e3; }
+.progress-line span { background: #9877a6; box-shadow: 0 0 9px #9877a644; }
+.watermark { color: #9c91a0; }
+.watermark span { color: #8f6ca2; }
+.success-check { background: #5ba878; box-shadow: 0 0 22px #5ba87855; }
+.orbit-dot { background: #a28cac; box-shadow: 0 0 16px #a28cac55; }
+.success-details { border-top-color: #e4dce7; }
+.close-success { color: #817487; background: #ebe5ed; }
+.modal-backdrop { background: #473b4d36; }
+.edit-modal, .receipt-modal { border-color: #dfd4e2; background: #fbfafc; box-shadow: 0 -15px 60px #6f5e7626; }
+.modal-handle { background: #c9bbcD; }
+.edit-modal h2, .receipt-modal h2 { color: #332a38; }
+.edit-modal input { color: #3d3243; border-color: #d6cbd9; background: #f1edf3; }
+.modal-actions button { color: #826a90; }
+.modal-actions button:last-child { color: #765486; }
+.receipt-close { color: #7f7186; background: #eee9f0; }
+.receipt-logo { color: #8f6ca2; }
+.receipt-status { color: #4d9869; }
+.receipt-modal p, .receipt-line span { color: #8a7f8f; }
+.receipt-line b { color: #44374b; }
+.receipt-approved { color: #4d9869 !important; }
+.secondary-button { color: #765486; border-color: #cdbad4; background: #f0e8f3; }
+.toast { border-color: #cdb9d5; background: #fbf8fc; color: #5c4964; box-shadow: 0 9px 30px #7e6e8526; }
+@media (min-width: 640px) { .app-shell { box-shadow: 0 0 100px #7e708733; border-color: #dfd7e2; } }

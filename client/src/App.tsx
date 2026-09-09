@@ -25,6 +25,7 @@ import {
   X,
 } from "lucide-react";
 import "./index.css";
+import "./light-overrides.css";
 
 type Screen =
   | "splash"
@@ -36,6 +37,7 @@ type Screen =
   | "processing"
   | "success";
 type EditField = "name" | "balance" | null;
+type PixInfo = { display: string; type: string; institution: string; key: string };
 
 const contacts = [
   { initials: "FV", name: "Fábio Vieira", meta: "RECARGA" },
@@ -55,6 +57,18 @@ function toCents(value: string) {
   return Number(normalized || "0");
 }
 
+function resolvePixKey(raw: string): PixInfo {
+  const value = raw.trim();
+  const digits = value.replace(/\D/g, "");
+  if (/^\d{11}$/.test(digits)) {
+    const cpf = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+    return { display: cpf, type: "CPF", institution: "Banco Purpou S.A.", key: cpf };
+  }
+  if (value.includes("@")) return { display: value.toLowerCase(), type: "E-mail", institution: "Banco Purpou S.A.", key: value.toLowerCase() };
+  const display = value ? value.toUpperCase() : "QUALQUER CHAVE";
+  return { display, type: "Chave Pix", institution: "Instituição Financeira Ltda", key: display };
+}
+
 function App() {
   const [screen, setScreen] = useState<Screen>("splash");
   const [name, setName] = useState(() => localStorage.getItem("purpou-name") || "felipe");
@@ -71,7 +85,8 @@ function App() {
 
   const formattedBalance = useMemo(() => formatCurrency(balance), [balance]);
   const formattedAmount = useMemo(() => formatCurrency(amount), [amount]);
-  const recipient = pixKey.trim() || "QUALQUER CHAVE";
+  const pixInfo = useMemo(() => resolvePixKey(pixKey), [pixKey]);
+  const recipient = pixInfo.display;
 
   useEffect(() => {
     const timer = window.setTimeout(() => setScreen("home"), 1500);
@@ -208,7 +223,7 @@ function App() {
 
       {screen === "pix-amount" && (
         <AmountScreen
-          recipient={recipient}
+          pixInfo={pixInfo}
           amount={formattedAmount}
           onBack={() => setScreen("pix-search")}
           onDigit={addDigit}
@@ -219,7 +234,7 @@ function App() {
 
       {screen === "pix-review" && (
         <ReviewScreen
-          recipient={recipient}
+          pixInfo={pixInfo}
           amount={formattedAmount}
           onBack={() => setScreen("pix-amount")}
           onContinue={startTransfer}
@@ -240,7 +255,7 @@ function App() {
 
       {screen === "success" && (
         <SuccessScreen
-          recipient={recipient}
+          pixInfo={pixInfo}
           amount={formattedAmount}
           onReceipt={() => setReceiptOpen(true)}
           onFinish={goHome}
@@ -258,7 +273,7 @@ function App() {
       )}
 
       {receiptOpen && (
-        <ReceiptModal recipient={recipient} amount={formattedAmount} onClose={() => setReceiptOpen(false)} />
+        <ReceiptModal pixInfo={pixInfo} amount={formattedAmount} onClose={() => setReceiptOpen(false)} />
       )}
 
       {toast && <div className="toast" role="status">{toast}</div>}
@@ -267,12 +282,7 @@ function App() {
 }
 
 function StatusBar() {
-  return (
-    <div className="status-bar">
-      <span>20:33</span>
-      <div className="status-right"><span className="signal">▮▮▮</span><span>⌁</span><span className="battery">75</span></div>
-    </div>
-  );
+  return null;
 }
 
 function TopBar({ onBack, light = false }: { onBack?: () => void; light?: boolean }) {
@@ -394,9 +404,9 @@ function PixSearchScreen({ value, setValue, onBack, onContinue, onPickContact }:
   );
 }
 
-function AmountScreen({ recipient, amount, onBack, onDigit, onDelete, onContinue }: { recipient: string; amount: string; onBack: () => void; onDigit: (digit: string) => void; onDelete: () => void; onContinue: () => void }) {
+function AmountScreen({ pixInfo, amount, onBack, onDigit, onDelete, onContinue }: { pixInfo: PixInfo; amount: string; onBack: () => void; onDigit: (digit: string) => void; onDelete: () => void; onContinue: () => void }) {
   return (
-    <div className="flow-screen amount-screen"><StatusBar /><div className="amount-top"><button className="icon-button" onClick={onBack} aria-label="Voltar"><ArrowLeft size={21} /></button><span>Transferir para</span><strong>{recipient}</strong></div><div className="amount-display"><span>Valor</span><strong>{amount}</strong><div className="amount-underline" /></div><div className="pay-card"><span>Pagando com</span><div className="wallet-card"><div className="wallet-icon"><WalletCards size={19} /></div><div><b>Saldo Nubank</b><small>Atual: R$ 500</small></div></div></div><NumberPad onDigit={onDigit} onDelete={onDelete} /><button className="primary-button amount-continue" onClick={onContinue}>Continuar com saldo <ArrowRight size={18} /></button></div>
+    <div className="flow-screen amount-screen"><StatusBar /><div className="amount-top"><button className="icon-button" onClick={onBack} aria-label="Voltar"><ArrowLeft size={21} /></button><span>Transferir para</span><strong>{pixInfo.display}</strong><small>{pixInfo.type} · {pixInfo.institution}</small></div><div className="amount-display"><span>Valor</span><strong>{amount}</strong><div className="amount-underline" /></div><div className="pay-card"><span>Pagando com</span><div className="wallet-card"><div className="wallet-icon"><WalletCards size={19} /></div><div><b>Saldo Nubank</b><small>Atual: R$ 500</small></div></div></div><NumberPad onDigit={onDigit} onDelete={onDelete} /><button className="primary-button amount-continue" onClick={onContinue}>Continuar com saldo <ArrowRight size={18} /></button></div>
   );
 }
 
@@ -405,9 +415,9 @@ function NumberPad({ onDigit, onDelete }: { onDigit: (digit: string) => void; on
   return <div className="number-pad">{digits.map((digit) => <button key={digit} onClick={() => digit === "⌫" ? onDelete() : digit !== "." && onDigit(digit)}>{digit}</button>)}</div>;
 }
 
-function ReviewScreen({ recipient, amount, onBack, onContinue }: { recipient: string; amount: string; onBack: () => void; onContinue: () => void }) {
+function ReviewScreen({ pixInfo, amount, onBack, onContinue }: { pixInfo: PixInfo; amount: string; onBack: () => void; onContinue: () => void }) {
   return (
-    <div className="flow-screen review-screen"><StatusBar /><div className="review-top"><button className="icon-button" onClick={onBack} aria-label="Voltar"><ArrowLeft size={21} /></button><span>Revisar transferência</span><button className="icon-button" onClick={onBack} aria-label="Fechar"><X size={20} /></button></div><div className="review-main"><div className="review-symbol"><Send size={25} /></div><p className="review-kicker">Você vai enviar</p><h1>{amount}</h1><div className="review-recipient"><span>Para</span><strong>{recipient}</strong><small>Instituição Financeira Ltda</small></div><div className="review-details"><div><span>Quando</span><b>Agora, sem repetir</b></div><div><span>Tipo</span><b>Via Pix</b></div></div></div><button className="primary-button bottom-button" onClick={onContinue}>Enviar <Send size={17} /></button></div>
+    <div className="flow-screen review-screen"><StatusBar /><div className="review-top"><button className="icon-button" onClick={onBack} aria-label="Voltar"><ArrowLeft size={21} /></button><span>Revisar transferência</span><button className="icon-button" onClick={onBack} aria-label="Fechar"><X size={20} /></button></div><div className="review-main"><div className="review-symbol"><Send size={25} /></div><p className="review-kicker">Você vai enviar</p><h1>{amount}</h1><div className="review-recipient"><span>Para</span><strong>{pixInfo.display}</strong><small>{pixInfo.type} · {pixInfo.institution}</small></div><div className="review-details"><div><span>Quando</span><b>Agora, sem repetir</b></div><div><span>Tipo</span><b>Via Pix</b></div></div></div><button className="primary-button bottom-button" onClick={onContinue}>Enviar <Send size={17} /></button></div>
   );
 }
 
@@ -421,8 +431,8 @@ function ProcessingScreen({ step }: { step: number }) {
   return <div className="processing-screen"><StatusBar /><div className="processing-mark"><div className="processing-ring" /><span>nu</span></div><div className="processing-copy"><strong>{step === 0 ? "Transferindo..." : "Gerando comprovante..."}</strong><div className="progress-line"><span style={{ width: step === 0 ? "38%" : "86%" }} /></div></div><p className="watermark">purpou<span>bank</span></p></div>;
 }
 
-function SuccessScreen({ recipient, amount, onReceipt, onFinish }: { recipient: string; amount: string; onReceipt: () => void; onFinish: () => void }) {
-  return <div className="success-screen"><StatusBar /><button className="close-success" onClick={onFinish} aria-label="Fechar"><X size={20} /></button><div className="success-content"><div className="success-orbit"><span className="orbit-dot dot-one" /><span className="orbit-dot dot-two" /><span className="orbit-dot dot-three" /><span className="success-check"><Check size={27} /></span></div><p className="success-label">Sua transferência foi concluída</p><h1>{amount}</h1><p className="success-to">Para {recipient}</p><div className="success-details"><div><span>Instituição</span><b>INSTITUIÇÃO FINANCEIRA LTDA</b></div><div><span>Quando</span><b>Agora</b></div></div></div><button className="primary-button bottom-button" onClick={onReceipt}><ReceiptText size={17} /> Abrir comprovante</button></div>;
+function SuccessScreen({ pixInfo, amount, onReceipt, onFinish }: { pixInfo: PixInfo; amount: string; onReceipt: () => void; onFinish: () => void }) {
+  return <div className="success-screen"><StatusBar /><button className="close-success" onClick={onFinish} aria-label="Fechar"><X size={20} /></button><div className="success-content"><div className="success-orbit"><span className="orbit-dot dot-one" /><span className="orbit-dot dot-two" /><span className="orbit-dot dot-three" /><span className="success-check"><Check size={27} /></span></div><p className="success-label">Sua transferência foi concluída</p><h1>{amount}</h1><p className="success-to">Para {pixInfo.display}</p><div className="success-details"><div><span>Instituição</span><b>{pixInfo.institution}</b></div><div><span>Chave</span><b>{pixInfo.type}</b></div><div><span>Quando</span><b>Agora</b></div></div></div><button className="primary-button bottom-button" onClick={onReceipt}><ReceiptText size={17} /> Abrir comprovante</button></div>;
 }
 
 function EditModal({ field, value, setValue, onClose, onSave }: { field: Exclude<EditField, null>; value: string; setValue: (value: string) => void; onClose: () => void; onSave: () => void }) {
@@ -430,8 +440,11 @@ function EditModal({ field, value, setValue, onClose, onSave }: { field: Exclude
   return <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><div className="edit-modal"><div className="modal-handle" /><h2>Digite o novo {isName ? "nome" : "saldo"}:</h2><input autoFocus value={value} onChange={(event) => setValue(event.target.value)} inputMode={isName ? "text" : "decimal"} onKeyDown={(event) => event.key === "Enter" && onSave()} /><div className="modal-actions"><button onClick={onClose}>Cancelar</button><button onClick={onSave}>OK</button></div></div></div>;
 }
 
-function ReceiptModal({ recipient, amount, onClose }: { recipient: string; amount: string; onClose: () => void }) {
-  return <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><div className="receipt-modal"><button className="receipt-close" onClick={onClose} aria-label="Fechar"><X size={19} /></button><div className="receipt-logo">nu</div><span className="receipt-status"><Check size={14} /> Comprovante Pix</span><h2>{amount}</h2><p>Transferência concluída</p><div className="receipt-line"><span>Para</span><b>{recipient}</b></div><div className="receipt-line"><span>Instituição</span><b>Instituição Financeira Ltda</b></div><div className="receipt-line"><span>Data</span><b>Hoje, 20:33</b></div><button className="secondary-button" onClick={() => navigator.clipboard?.writeText(`${amount} para ${recipient}`)}><Copy size={16} /> Copiar detalhes</button></div></div>;
+function ReceiptModal({ pixInfo, amount, onClose }: { pixInfo: PixInfo; amount: string; onClose: () => void }) {
+  const transactionId = `PBPX${new Date().toISOString().replace(/\D/g, "").slice(0, 14)}`;
+  const dateLabel = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date());
+  const receiptText = `Comprovante Pix\nValor: ${amount}\nDestinatário: ${pixInfo.display}\nChave: ${pixInfo.key}\nInstituição: ${pixInfo.institution}\nID: ${transactionId}`;
+  return <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><div className="receipt-modal"><button className="receipt-close" onClick={onClose} aria-label="Fechar"><X size={19} /></button><div className="receipt-logo">nu</div><span className="receipt-status"><Check size={14} /> Comprovante Pix</span><h2>{amount}</h2><p>Transferência realizada com sucesso</p><div className="receipt-line"><span>Status</span><b className="receipt-approved">Concluído</b></div><div className="receipt-line"><span>Destinatário</span><b>{pixInfo.display}</b></div><div className="receipt-line"><span>Chave Pix</span><b>{pixInfo.key}</b></div><div className="receipt-line"><span>Instituição</span><b>{pixInfo.institution}</b></div><div className="receipt-line"><span>Data e hora</span><b>{dateLabel}</b></div><div className="receipt-line"><span>ID da transação</span><b>{transactionId}</b></div><button className="secondary-button" onClick={() => navigator.clipboard?.writeText(receiptText)}><Copy size={16} /> Copiar comprovante</button></div></div>;
 }
 
 export default App;
