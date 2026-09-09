@@ -1,0 +1,6 @@
+.receipt-title { max-width: 240px; margin: 10px 0 12px; color: #f1eaf3; font-size: 17px; line-height: 1.2; letter-spacing: -.035em; }
+.receipt-amount-label { margin: 25px 0 3px !important; color: #9c91a1; font-size: 10px; }
+.receipt-modal h3 { margin: 0 0 23px; color: #f7f0f8; font-size: 30px; letter-spacing: -.07em; }
+.receipt-section-title { padding: 14px 0 2px; color: #bd9ac7; font-size: 9px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.receipt-section-spaced { margin-top: 8px; }
+.receipt-line b { overflow-wrap: anywhere; }

@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import "./index.css";
 import "./light-overrides.css";
+import "./receipt-overrides.css";
 
 type Screen =
   | "splash"
@@ -57,16 +58,26 @@ function toCents(value: string) {
   return Number(normalized || "0");
 }
 
+function maskPixInput(value: string) {
+  if (/[A-Za-z@]/.test(value)) return value;
+  const digits = value.replace(/\D/g, "").slice(0, 11);
+  if (!digits) return "";
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `${digits.slice(0, 3)}.${digits.slice(3)}`;
+  if (digits.length <= 9) return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6)}`;
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
+}
+
 function resolvePixKey(raw: string): PixInfo {
   const value = raw.trim();
   const digits = value.replace(/\D/g, "");
   if (/^\d{11}$/.test(digits)) {
     const cpf = `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`;
-    return { display: cpf, type: "CPF", institution: "Banco Purpou S.A.", key: cpf };
+    return { display: cpf, type: "CPF", institution: "Instituição a confirmar", key: cpf };
   }
-  if (value.includes("@")) return { display: value.toLowerCase(), type: "E-mail", institution: "Banco Purpou S.A.", key: value.toLowerCase() };
+  if (value.includes("@")) return { display: value.toLowerCase(), type: "E-mail", institution: "Instituição a confirmar", key: value.toLowerCase() };
   const display = value ? value.toUpperCase() : "QUALQUER CHAVE";
-  return { display, type: "Chave Pix", institution: "Instituição Financeira Ltda", key: display };
+  return { display, type: "Chave Pix", institution: "Instituição a confirmar", key: display };
 }
 
 function App() {
@@ -394,7 +405,7 @@ function PixSearchScreen({ value, setValue, onBack, onContinue, onPickContact }:
       <PixHeader title={<>Para quem você quer<br />transferir?</>} subtitle="" onBack={onBack} />
       <div className="pix-search-body">
         <label className="field-label" htmlFor="pix-key">Insira o dado de quem vai receber</label>
-        <div className="search-input-wrap"><input id="pix-key" autoFocus value={value} onChange={(event) => setValue(event.target.value)} placeholder="Nome, CPF/CNPJ ou chave Pix" /><QrCode size={20} /></div>
+        <div className="search-input-wrap"><input id="pix-key" autoFocus value={value} onChange={(event) => setValue(maskPixInput(event.target.value))} placeholder="Nome, CPF/CNPJ ou chave Pix" inputMode="text" /><QrCode size={20} /></div>
         <div className="search-divider" />
         <p className="muted-copy">Você sempre costuma pagar</p>
         <div className="contacts-row">{contacts.map((contact) => <button className="contact" key={contact.initials} onClick={() => onPickContact(contact)}><span>{contact.initials}</span><b>{contact.name}</b><small>{contact.meta}</small></button>)}</div>
@@ -443,8 +454,8 @@ function EditModal({ field, value, setValue, onClose, onSave }: { field: Exclude
 function ReceiptModal({ pixInfo, amount, onClose }: { pixInfo: PixInfo; amount: string; onClose: () => void }) {
   const transactionId = `PBPX${new Date().toISOString().replace(/\D/g, "").slice(0, 14)}`;
   const dateLabel = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date());
-  const receiptText = `Comprovante Pix\nValor: ${amount}\nDestinatário: ${pixInfo.display}\nChave: ${pixInfo.key}\nInstituição: ${pixInfo.institution}\nID: ${transactionId}`;
-  return <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><div className="receipt-modal"><button className="receipt-close" onClick={onClose} aria-label="Fechar"><X size={19} /></button><div className="receipt-logo">nu</div><span className="receipt-status"><Check size={14} /> Comprovante Pix</span><h2>{amount}</h2><p>Transferência realizada com sucesso</p><div className="receipt-line"><span>Status</span><b className="receipt-approved">Concluído</b></div><div className="receipt-line"><span>Destinatário</span><b>{pixInfo.display}</b></div><div className="receipt-line"><span>Chave Pix</span><b>{pixInfo.key}</b></div><div className="receipt-line"><span>Instituição</span><b>{pixInfo.institution}</b></div><div className="receipt-line"><span>Data e hora</span><b>{dateLabel}</b></div><div className="receipt-line"><span>ID da transação</span><b>{transactionId}</b></div><button className="secondary-button" onClick={() => navigator.clipboard?.writeText(receiptText)}><Copy size={16} /> Copiar comprovante</button></div></div>;
+  const receiptText = `Comprovante de transferência Pix\nValor enviado: ${amount}\nDestinatário: ${pixInfo.display}\nChave Pix: ${pixInfo.key}\nInstituição: ${pixInfo.institution}\nData e hora: ${dateLabel}\nID da transação: ${transactionId}`;
+  return <div className="modal-backdrop" onMouseDown={(event) => event.target === event.currentTarget && onClose()}><div className="receipt-modal"><button className="receipt-close" onClick={onClose} aria-label="Fechar"><X size={19} /></button><div className="receipt-logo">nu</div><h2 className="receipt-title">Comprovante de transferência Pix</h2><span className="receipt-status"><Check size={14} /> Transferência concluída</span><p className="receipt-amount-label">Valor enviado</p><h3>{amount}</h3><div className="receipt-section-title">Dados da transferência</div><div className="receipt-line"><span>Para</span><b>{pixInfo.display}</b></div><div className="receipt-line"><span>Chave Pix</span><b>{pixInfo.key}</b></div><div className="receipt-line"><span>Tipo de chave</span><b>{pixInfo.type}</b></div><div className="receipt-line"><span>Instituição</span><b>{pixInfo.institution}</b></div><div className="receipt-section-title receipt-section-spaced">Detalhes</div><div className="receipt-line"><span>Data e hora</span><b>{dateLabel}</b></div><div className="receipt-line"><span>ID da transação</span><b>{transactionId}</b></div><button className="secondary-button" onClick={() => navigator.clipboard?.writeText(receiptText)}><Copy size={16} /> Copiar comprovante</button></div></div>;
 }
 
 export default App;
